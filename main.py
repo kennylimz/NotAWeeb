@@ -1,3 +1,4 @@
+import hashlib
 from flask import Flask, request
 import receive
 import reply
@@ -6,7 +7,30 @@ app = Flask(__name__)
 
 @app.route('/wx', methods=['GET'])
 def handleGet():
-    return "hello, this is get handle view"
+    try:
+        data = request.args
+        if len(data) == 0:
+            return "hello, this is handle view"
+
+        signature = data.get('signature', '')
+        timestamp = data.get('timestamp', '')
+        nonce = data.get('nonce', '')
+        echostr = data.get('echostr', '')
+        token = "WECHAT"
+
+        string_list = [token, timestamp, nonce]
+        string_list.sort()
+        sha1 = hashlib.sha1()
+        for item in string_list:
+            sha1.update(item.encode('utf-8'))
+        hashcode = sha1.hexdigest()
+        print("handle/GET func: hashcode, signature:", hashcode, signature)
+        if hashcode == signature:
+            return echostr
+        else:
+            return ""
+    except Exception as Argument:
+        return str(Argument)
 
 @app.route('/wx', methods=['POST'])
 def handlePost():
