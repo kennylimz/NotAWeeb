@@ -2,6 +2,7 @@ import hashlib
 from flask import Flask, request
 import receive
 import reply
+import process
 
 app = Flask(__name__)
 
@@ -42,9 +43,10 @@ def handlePost():
         if isinstance(recMsg, receive.Msg) and recMsg.MsgType == 'text':
             toUser = recMsg.FromUserName
             fromUser = recMsg.ToUserName
-            content = recMsg.Content.decode('utf-8')
-            replyMsg = reply.TextMsg(toUser, fromUser, content)
-            print("Reply:",content)
+            recContent = recMsg.Content.decode('utf-8')
+            replyContent = process.textprocess(recContent)
+            replyMsg = reply.TextMsg(toUser, fromUser, replyContent)
+            print("Reply:",replyContent)
             return replyMsg.send()
         else:
             print("暂且不处理")
