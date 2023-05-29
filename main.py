@@ -68,7 +68,7 @@ def handlePost():
             toUser = recMsg.FromUserName
             fromUser = recMsg.ToUserName
             recContent = recMsg.Content.decode('utf-8')
-            replyContent = process.textProcess(recContent, fromUser, duplicated)
+            replyContent = process.textProcess(recContent, toUser, duplicated)
             replyMsg = reply.TextMsg(toUser, fromUser, replyContent)
             print("Reply:", replyContent)
             return replyMsg.send()
