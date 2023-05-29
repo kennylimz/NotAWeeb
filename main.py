@@ -73,7 +73,6 @@ def handlePost():
             print("Reply:", replyContent)
             return replyMsg.send()
         else:
-            print("暂且不处理")
             return "success"
     except Exception as Argment:
         return str(Argment)
