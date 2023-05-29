@@ -5,8 +5,11 @@ import reply
 import process
 from flask_apscheduler import APScheduler
 
+
 class Config:
     SCHEDULER_API_ENABLED = True
+
+
 app = Flask(__name__)
 app.config.from_object(Config())
 scheduler = APScheduler()
@@ -14,10 +17,12 @@ scheduler.init_app(app)
 scheduler.start()
 msgIds = []
 
+
 @scheduler.task('interval', id='clear_quota', minutes=60)
 def job1():
     process.gpt_dict.clear()
     print("Quota Cleared")
+
 
 @app.route('/wx', methods=['GET'])
 def handleGet():
@@ -44,6 +49,7 @@ def handleGet():
     except Exception as Argument:
         return str(Argument)
 
+
 @app.route('/wx', methods=['POST'])
 def handlePost():
     try:
@@ -60,16 +66,18 @@ def handlePost():
             toUser = recMsg.FromUserName
             fromUser = recMsg.ToUserName
             recContent = recMsg.Content.decode('utf-8')
-            replyContent = process.textProcess(recContent,fromUser,duplicated)
+            replyContent = process.textProcess(recContent, fromUser, duplicated)
             replyMsg = reply.TextMsg(toUser, fromUser, replyContent)
-            print("Reply:",replyContent)
-            return replyMsg.send()
+            print("Reply:", replyContent)
+            if replyContent == "success":
+                pass
+            else:
+                return replyMsg.send()
         else:
             print("暂且不处理")
             return "success"
     except Exception as Argment:
         return str(Argment)
-
 
 
 if __name__ == '__main__':
