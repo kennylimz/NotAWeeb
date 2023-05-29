@@ -1,5 +1,5 @@
 import openai
-openai.api_key = "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"
+openai.api_key = ""
 gpt_dict = {}
 
 def textProcess(content,fromUser):
@@ -25,7 +25,7 @@ def gpt(content,fromUser):
     print("Current Messages:")
     for message in messages:
         print(message['role'],message['content'])
-    chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+    chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo",messages=messages)
     reply = chat_completion.choices[0].message.content
     messages.append({"role": "assistant", "content": reply})
     gpt_dict[fromUser]=messages

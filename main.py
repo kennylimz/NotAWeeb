@@ -12,6 +12,7 @@ app.config.from_object(Config())
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
+msgIds = []
 
 @scheduler.task('interval', id='clear_quota', minutes=60)
 def job1():
@@ -24,13 +25,11 @@ def handleGet():
         data = request.args
         if len(data) == 0:
             return "hello, this is handle view"
-
         signature = data.get('signature', '')
         timestamp = data.get('timestamp', '')
         nonce = data.get('nonce', '')
         echostr = data.get('echostr', '')
         token = "WECHAT"
-
         string_list = [token, timestamp, nonce]
         string_list.sort()
         sha1 = hashlib.sha1()
@@ -52,6 +51,10 @@ def handlePost():
         print("Handle Post webdata is:\n", webData)
         # 后台打日志
         recMsg = receive.parse_xml(webData)
+        if recMsg.MsgId in msgIds:
+            return "success"
+        else:
+            msgIds.append(recMsg.MsgId)
         if isinstance(recMsg, receive.Msg) and recMsg.MsgType == 'text':
             toUser = recMsg.FromUserName
             fromUser = recMsg.ToUserName
@@ -65,6 +68,8 @@ def handlePost():
             return "success"
     except Exception as Argment:
         return str(Argment)
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
