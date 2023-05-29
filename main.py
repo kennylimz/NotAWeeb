@@ -51,15 +51,16 @@ def handlePost():
         print("Handle Post webdata is:\n", webData)
         # 后台打日志
         recMsg = receive.parse_xml(webData)
+        duplicated = False
         if recMsg.MsgId in msgIds:
-            return "success"
+            duplicated = True
         else:
             msgIds.append(recMsg.MsgId)
         if isinstance(recMsg, receive.Msg) and recMsg.MsgType == 'text':
             toUser = recMsg.FromUserName
             fromUser = recMsg.ToUserName
             recContent = recMsg.Content.decode('utf-8')
-            replyContent = process.textProcess(recContent,fromUser)
+            replyContent = process.textProcess(recContent,fromUser,duplicated)
             replyMsg = reply.TextMsg(toUser, fromUser, replyContent)
             print("Reply:",replyContent)
             return replyMsg.send()
