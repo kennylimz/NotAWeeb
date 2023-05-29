@@ -3,8 +3,20 @@ from flask import Flask, request
 import receive
 import reply
 import process
+from flask_apscheduler import APScheduler
 
+class Config:
+    SCHEDULER_API_ENABLED = True
 app = Flask(__name__)
+app.config.from_object(Config())
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
+@scheduler.task('interval', id='clear_quota', minutes=60)
+def job1():
+    process.gpt_dict.clear()
+    print("Quota Cleared")
 
 @app.route('/wx', methods=['GET'])
 def handleGet():
@@ -37,7 +49,7 @@ def handleGet():
 def handlePost():
     try:
         webData = request.data.decode('utf-8')
-        print("Handle Post webdata is ", webData)
+        print("Handle Post webdata is:\n", webData)
         # 后台打日志
         recMsg = receive.parse_xml(webData)
         if isinstance(recMsg, receive.Msg) and recMsg.MsgType == 'text':

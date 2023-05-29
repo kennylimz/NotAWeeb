@@ -1,5 +1,5 @@
 import openai
-openai.api_key = "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"
+openai.api_key = "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"
 gpt_dict = {}
 
 def textProcess(content,fromUser):
@@ -15,19 +15,20 @@ def mudae(content,fromUser):
 
 def gpt(content,fromUser):
     global gpt_dict
+    messages = []
     if fromUser in gpt_dict:
         messages = gpt_dict[fromUser]
-    else:
-        messages = []
-    if len(messages)>=10:
+    if len(messages)>=20:
         return "Quota exceeded"
     messages.append({"role": "user", "content": content})
+    print(len(messages))
     print("Current Messages:")
     for message in messages:
-        print(message['user'],message['content'])
+        print(message['role'],message['content'])
     chat_completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
     reply = chat_completion.choices[0].message.content
     messages.append({"role": "assistant", "content": reply})
+    gpt_dict[fromUser]=messages
     return reply
 
 
