@@ -20,13 +20,14 @@ def gpt(content,fromUser,getLast=False):
     messages = []
     if fromUser in gpt_dict:
         messages = gpt_dict[fromUser]
-    if len(messages)>=20:
+    if len(messages)>=30:
         return "Quota Exceeded"
     elif getLast:
         print("Trying to rechieve last reply...")
         if messages[-1]["role"]=="assistant":
             return messages[-1]['content']
-    messages.append({"role": "user", "content": content})
+    else:
+        messages.append({"role": "user", "content": content})
     print(len(messages))
     print("Current Messages:")
     for message in messages:
