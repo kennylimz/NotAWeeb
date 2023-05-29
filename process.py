@@ -1,4 +1,5 @@
 import openai
+import time
 openai.api_key = ""
 gpt_dict = {}
 
@@ -24,6 +25,7 @@ def gpt(content,fromUser,getLast=False):
         if messages[-1]["role"]=="assistant":
             return messages[-1]['content']
         else:
+            time.sleep(5)
             return "success"
     messages.append({"role": "user", "content": content})
     print(len(messages))

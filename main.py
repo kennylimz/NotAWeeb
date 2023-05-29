@@ -1,4 +1,6 @@
 import hashlib
+import time
+
 from flask import Flask, request
 import receive
 import reply
@@ -69,10 +71,7 @@ def handlePost():
             replyContent = process.textProcess(recContent, fromUser, duplicated)
             replyMsg = reply.TextMsg(toUser, fromUser, replyContent)
             print("Reply:", replyContent)
-            if replyContent == "success":
-                pass
-            else:
-                return replyMsg.send()
+            return replyMsg.send()
         else:
             print("暂且不处理")
             return "success"
