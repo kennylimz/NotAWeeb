@@ -1,18 +1,19 @@
 import openai
 import time
-openai.api_key = "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"
+import mudae
+openai.api_key = ""
 gpt_dict = {}
 
 def textProcess(content,fromUser,duplicated=False):
     if content[0]=='$':
-        return mudae(content[1:],fromUser)
+        return mudaeReply(content[1:],fromUser),"image"
     elif content[0]=='!':
-        return "siuuuuu!"
+        return "siuuuuu!","text"
     else:
-        return gpt(content,fromUser,duplicated)
+        return gpt(content,fromUser,duplicated),"text"
 
-def mudae(content,fromUser):
-    return "Tokai Teio dayo!"
+def mudaeReply(content,fromUser):
+    return mudae.processMudae(content,fromUser)
 
 def gpt(content,fromUser,getLast=False):
     global gpt_dict

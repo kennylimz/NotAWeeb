@@ -68,8 +68,11 @@ def handlePost():
             toUser = recMsg.FromUserName
             fromUser = recMsg.ToUserName
             recContent = recMsg.Content.decode('utf-8')
-            replyContent = process.textProcess(recContent, toUser, duplicated)
-            replyMsg = reply.TextMsg(toUser, fromUser, replyContent)
+            replyContent, replyType = process.textProcess(recContent, toUser, duplicated)
+            if replyType == "text":
+                replyMsg = reply.TextMsg(toUser, fromUser, replyContent)
+            elif replyType == "image":
+                replyMsg = reply.ImageMsg(toUser, fromUser, replyContent)
             print("Reply:", replyContent)
             return replyMsg.send()
         else:
