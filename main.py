@@ -68,8 +68,10 @@ def handlePost():
             toUser = recMsg.FromUserName
             fromUser = recMsg.ToUserName
             recContent = recMsg.Content.decode('utf-8')
-            replyContent, replyType = process.textProcess(recContent, toUser, duplicated)
-            if replyType == "text":
+            replyContent, replyType = process.textProcess(recContent, toUser, duplicated, access_token="69_fyjhOJKffsk2g1Akf_RFH91JZc7Exf0RtYiu0s4wkqws88Utize9Y1x60QaomW2shKaXIf0g012kIqWoisOV8jDlsfOmolS6m_uEGgzp6EZVhHWN5zpwwpGb5QcWKNaABAESV")
+            if replyType == "gpt":
+                return "success"
+            elif replyType == "text":
                 replyMsg = reply.TextMsg(toUser, fromUser, replyContent)
             elif replyType == "image":
                 replyMsg = reply.ImageMsg(toUser, fromUser, replyContent)
