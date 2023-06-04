@@ -20,8 +20,8 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 msgIds = []
-response = requests.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx89ada809e95adb96&secret=afaa7edfa9f8d54cc8b68c48be4aef19")
-access_token = response.json()['access_token']
+# response = requests.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx89ada809e95adb96&secret=")
+# access_token = response.json()['access_token']
 connection = pymysql.connect(
     host='34.31.231.212',
     port= 3306,
@@ -88,7 +88,7 @@ def handlePost():
             if recContent[0] == '$':
                 replyContent, replyType = mudae.processMudae(recContent[1:],toUser,connection)
             else:
-                replyContent, replyType = process.textProcess(recContent, toUser, duplicated, access_token=access_token)
+                replyContent, replyType = process.textProcess(recContent, toUser, duplicated)
             # if replyType == "gpt":
             #     return "success"
             if replyType == "text":
