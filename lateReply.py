@@ -25,6 +25,7 @@ class LateTextMsg(LateMsg):
         headers = {'Content-Type': 'application/json'}
         json_payload = json.dumps(self.data)
         response = requests.post(url, params=params, headers=headers, data=json_payload)
+        print(json_payload)
         if response.status_code == 200:
             print('Late reply successful')
         else:

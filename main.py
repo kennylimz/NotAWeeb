@@ -1,12 +1,14 @@
 import hashlib
 import time
 
+import requests
 from flask import Flask, request
 import receive
 import reply
 import process
 from flask_apscheduler import APScheduler
-
+import pymysql
+import mudae
 
 class Config:
     SCHEDULER_API_ENABLED = True
@@ -18,12 +20,27 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 msgIds = []
-
+response = requests.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx89ada809e95adb96&secret=afaa7edfa9f8d54cc8b68c48be4aef19")
+access_token = response.json()['access_token']
+connection = pymysql.connect(
+    host='34.31.231.212',
+    port= 3306,
+    user='root',
+    password='12345678'
+)
 
 @scheduler.task('interval', id='clear_quota', minutes=60)
 def job1():
     process.gpt_dict.clear()
     print("Quota Cleared")
+
+@scheduler.task('interval', id='get_token', minutes=60)
+def job2():
+    global  access_token
+    response = requests.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx89ada809e95adb96&secret=afaa7edfa9f8d54cc8b68c48be4aef19")
+    access_token = response.json()['access_token']
+    print("access_token refreshed")
+
 
 
 @app.route('/wx', methods=['GET'])
@@ -68,10 +85,13 @@ def handlePost():
             toUser = recMsg.FromUserName
             fromUser = recMsg.ToUserName
             recContent = recMsg.Content.decode('utf-8')
-            replyContent, replyType = process.textProcess(recContent, toUser, duplicated, access_token="69_fyjhOJKffsk2g1Akf_RFH91JZc7Exf0RtYiu0s4wkqws88Utize9Y1x60QaomW2shKaXIf0g012kIqWoisOV8jDlsfOmolS6m_uEGgzp6EZVhHWN5zpwwpGb5QcWKNaABAESV")
-            if replyType == "gpt":
-                return "success"
-            elif replyType == "text":
+            if recContent[0] == '$':
+                replyContent, replyType = mudae.processMudae(recContent[1:],toUser,connection)
+            else:
+                replyContent, replyType = process.textProcess(recContent, toUser, duplicated, access_token=access_token)
+            # if replyType == "gpt":
+            #     return "success"
+            if replyType == "text":
                 replyMsg = reply.TextMsg(toUser, fromUser, replyContent)
             elif replyType == "image":
                 replyMsg = reply.ImageMsg(toUser, fromUser, replyContent)
