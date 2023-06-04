@@ -1,3 +1,14 @@
+def reset(connection):
+    cursor = connection.cursor()
+    cursor.nextset()
+    cursor.execute("USE notaweeb")
+    query = """
+        UPDATE player
+        SET curr_roll=NULL, roll_count=0, claimed=NULL
+    """
+    cursor.execute(query)
+    connection.commit()
+
 def processMudae(content,fromUser,connection):
     cursor = connection.cursor()
     cursor.nextset()
@@ -33,16 +44,24 @@ def processMudae(content,fromUser,connection):
     if not result:
         return "玩之前要先注册辣，\n注册格式是：$r 君の名", "text"
     else:
-        userid, username, wechat_id, hanging = result
+        userid, username, wechat_id, curr_roll, roll_count, claimed = result
     if content[:3] == "im ":
         return im(connection,content[3:])
+    elif content[:4] == "ima ":
+        return ima(connection,content[4:])
+    elif content[:3] == "imr":
+        return imr(connection,curr_roll)
     elif content[0] == 'w':
-        return w(connection,userid)
+        if not roll_count or roll_count<10:
+            return w(connection,userid)
+        return "（每小时10次，下个小时再来吧）","text"
     elif content[:7] == "divorce":
         return divorce(connection,userid,content[8:])
     elif content[:2] == "mm":
         return mm(connection,userid)
     elif content[:5] == "claim":
+        if claimed:
+            return "（已经claim过了，下个小时再来吧）","text"
         return claim(connection,userid)
     else:
         return "前面的功能以后再来探索吧","text"
@@ -51,10 +70,9 @@ def im(connection,content):
     cursor = connection.cursor()
     cursor.nextset()
     cursor.execute("USE notaweeb")
-    if content.split()[-1].isdigit():
+    if content.split()[-1][0] == '$':
         name = ' '.join(content.split()[:-1])
-        print(name)
-        index = content.split()[-1]
+        index = content.split()[-1][1:]
         query = f"""
             SELECT image_id
             FROM image
@@ -83,18 +101,89 @@ def im(connection,content):
         result = cursor.fetchone()
         if not result:
             return "Not Found", "text"
-        id, name, series, marry = result
-        if marry:
-            marry_query = f"""
-                SELECT name
-                FROM player
-                WHERE id = {marry}
-            """
-            cursor.execute(marry_query)
-            married_by = cursor.fetchone()[0]
-            return f"{name}\nfrom {series}\nMarried by {married_by}", "text"
+        id, name, series = result
+        marry_query = f"""
+            SELECT count(*)
+            FROM marry
+            WHERE waifu_id = {id}
+        """
+        cursor.execute(marry_query)
+        married_by = cursor.fetchone()[0]
+        if married_by:
+            return f"{name}\nfrom {series}\nClaim#： {married_by}", "text"
         else:
             return f"{name}\nfrom {series}", "text"
+
+def ima(connection, content):
+    cursor = connection.cursor()
+    cursor.nextset()
+    cursor.execute("USE notaweeb")
+    if content.split()[-1][0] == '$':
+        name = ' '.join(content.split()[:-1])
+        index = (int(content.split()[-1][1:])-1)*10
+        query = f"""
+            SELECT name
+            FROM waifu
+            WHERE series = '{name}'
+            ORDER BY RAND()
+            LIMIT 11
+            OFFSET {index}
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if not result:
+            return "Not found", "text"
+        name_list = []
+        for waifu_name in result:
+            name_list.append(waifu_name[0])
+        if len(name_list) > 10:
+            return '\n'.join(name_list[:10]), "text"
+        else:
+            return '\n'.join(name_list), "text"
+    else:
+        query = f"""
+            SELECT name
+            FROM waifu
+            WHERE series = '{content}'
+            LIMIT 11
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+        if not result:
+            return "Not found", "text"
+        name_list = []
+        for waifu_name in result:
+            name_list.append(waifu_name[0])
+        if len(name_list)>10:
+            return '\n'.join(name_list[:10])+"\n……", "text"
+        else:
+            return '\n'.join(name_list), "text"
+
+def imr(connection, curr_roll):
+    cursor = connection.cursor()
+    cursor.nextset()
+    cursor.execute("USE notaweeb")
+    query = f"""
+        SELECT *
+        FROM waifu
+        WHERE id = '{curr_roll}'
+    """
+    cursor.execute(query)
+    result = cursor.fetchone()
+    if not result:
+        return "Not Found", "text"
+    id, name, series = result
+    marry_query = f"""
+        SELECT count(*)
+        FROM marry
+        WHERE waifu_id = {id}
+    """
+    cursor.execute(marry_query)
+    married_by = cursor.fetchone()[0]
+    if married_by:
+        return f"{name}\nfrom {series}\nClaim#：{married_by}", "text"
+    else:
+        return f"{name}\nfrom {series}", "text"
 
 def w(connection,roller):
     cursor = connection.cursor()
@@ -104,10 +193,10 @@ def w(connection,roller):
         SELECT * FROM waifu ORDER BY RAND() LIMIT 1
     """
     cursor.execute(waifu_query)
-    waifu_id, waifu_name, _, owner = cursor.fetchone()
+    waifu_id = cursor.fetchone()[0]
     update_query = f"""
         UPDATE player
-        SET curr_roll = {waifu_id}
+        SET curr_roll={waifu_id}, roll_count=roll_count+1
         WHERE id = {roller}
     """
     cursor.execute(update_query)
@@ -135,51 +224,48 @@ def claim(connection, userid):
     """
     cursor.execute(user_query)
     username, curr_roll = cursor.fetchone()
-    if curr_roll == 0:
+    if not curr_roll:
         return "你还没roll捏","text"
     waifu_query = f"""
-        SELECT id, name, married_by
+        SELECT id, name
         FROM waifu
         WHERE id = {curr_roll}
     """
     cursor.execute(waifu_query)
     result = cursor.fetchone()
-    waifu_id, waifu_name, waifu_marry = result
-    print(result)
-    if waifu_marry:
-        marry_query = f"""
-            SELECT name
-            FROM player
-            WHERE id = {waifu_marry}
-        """
-        cursor.execute(marry_query)
-        ntr = cursor.fetchone()
-        if ntr==username:
-            return "已经是你的人辣","text"
-        else:
-            return f"已经是{ntr}的人辣","text"
-    else:
-        marry_query = f"""
-            UPDATE waifu
-            SET married_by = {userid}
-            WHERE id = {waifu_id}
-        """
-        cursor.execute(marry_query)
-        marry_query = f"""
-            UPDATE player
-            SET curr_roll = NULL
-            WHERE id = {userid}
-        """
-        cursor.execute(marry_query)
-        connection.commit()
-        return f"{username} and {waifu_name} are married!","text"
+    waifu_id, waifu_name = result
+    # if waifu_marry:
+    #     marry_query = f"""
+    #         SELECT name
+    #         FROM player
+    #         WHERE id = {waifu_marry}
+    #     """
+    #     cursor.execute(marry_query)
+    #     ntr = cursor.fetchone()
+    #     if ntr==username:
+    #         return "已经是你的人辣","text"
+    #     else:
+    #         return f"已经是{ntr}的人辣","text"
+    marry_query = f"""
+        INSERT INTO marry (user_id, waifu_id)
+        VALUES ({userid},{waifu_id})
+    """
+    cursor.execute(marry_query)
+    claim_query = f"""
+        UPDATE player
+        SET claimed = {waifu_id}
+        WHERE id = {userid}
+    """
+    cursor.execute(claim_query)
+    connection.commit()
+    return f"{username} and {waifu_name} are married!","text"
 
 def divorce(connection,userid,name):
     cursor = connection.cursor()
     cursor.nextset()
     cursor.execute("USE notaweeb")
     waifu_query = f"""
-        SELECT id, name, married_by
+        SELECT id, name
         FROM waifu
         WHERE name = '{name}'
     """
@@ -187,18 +273,14 @@ def divorce(connection,userid,name):
     result = cursor.fetchone()
     if not result:
         return "❌", "text"
-    waifu_id, waifu_name, waifu_marry = result
-    if waifu_marry!=userid:
-        return "❌", "text"
-    else:
-        div_query = f"""
-            UPDATE waifu
-            SET married_by = NULL
-            WHERE id = {waifu_id}
-        """
-        cursor.execute(div_query)
-        connection.commit()
-        return "✔","text"
+    waifu_id, waifu_name = result
+    div_query = f"""
+        DELETE FROM marry
+        WHERE waifu_id={waifu_id} AND user_id={userid}
+    """
+    cursor.execute(div_query)
+    connection.commit()
+    return "✔","text"
 
 def mm(connection, userid):
     cursor = connection.cursor()
@@ -207,7 +289,7 @@ def mm(connection, userid):
     harem_query = f"""
         SELECT name
         FROM waifu
-        WHERE married_by = {userid}
+        WHERE id IN (SELECT waifu_id FROM marry WHERE user_id = {userid})
     """
     cursor.execute(harem_query)
     waifu_names = cursor.fetchall()

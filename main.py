@@ -29,9 +29,10 @@ connection = pymysql.connect(
     password='12345678'
 )
 
-@scheduler.task('interval', id='clear_quota', minutes=60)
+@scheduler.task('interval', id='clear_quota', minutes=5)
 def job1():
     process.gpt_dict.clear()
+    mudae.reset(connection)
     print("Quota Cleared")
 
 @scheduler.task('interval', id='get_token', minutes=60)
