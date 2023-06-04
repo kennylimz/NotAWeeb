@@ -67,11 +67,11 @@ def im(connection,content):
             OFFSET {index}
         """
         cursor.execute(query)
-        result = cursor.fetchone()[0]
+        result = cursor.fetchone()
         if not result:
             return "Not Found", "text"
         else:
-            return result, "image"
+            return result[0], "image"
     else:
         name = content
         query = f"""
@@ -85,7 +85,14 @@ def im(connection,content):
         if not result:
             return "Not Found", "text"
         elif marry:
-            return f"{name}\nfrom {series}\nMarried by {marry}", "text"
+            marry_query = f"""
+                SELECT name
+                FROM player
+                WHERE id = {marry}
+            """
+            cursor.execute(marry_query)
+            married_by = cursor.fetchone()[0]
+            return f"{name}\nfrom {series}\nMarried by {married_by}", "text"
         else:
             return f"{name}\nfrom {series}", "text"
 
