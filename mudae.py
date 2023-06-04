@@ -81,10 +81,10 @@ def im(connection,content):
         """
         cursor.execute(query)
         result = cursor.fetchone()
-        id, name, series, marry = result
         if not result:
             return "Not Found", "text"
-        elif marry:
+        id, name, series, marry = result
+        if marry:
             marry_query = f"""
                 SELECT name
                 FROM player
