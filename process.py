@@ -7,18 +7,18 @@ import lateReply
 openai.api_key = ""
 gpt_dict = {}
 
-def textProcess(content,fromUser,duplicated=False,access_token=None):
+def textProcess(content,fromUser,duplicated=False):
     if content[0]=='!':
         return "siuuuuu!","text"
     else:
         # thread = Thread(target=gpt, args=(content,fromUser,duplicated,access_token))
         # thread.start()
-        return gpt(content,fromUser,duplicated,access_token),"text"
+        return gpt(content,fromUser,duplicated),"text"
 
 def mudaeReply(content,fromUser):
     return mudae.processMudae(content,fromUser)
 
-def gpt(content,fromUser,getLast=False,access_token=None):
+def gpt(content,fromUser,getLast=False):
     global gpt_dict
     time0 = time.time()
     messages = []

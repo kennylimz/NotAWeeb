@@ -7,7 +7,7 @@ def processMudae(content,fromUser,connection):
     elif content[0] == 'w':
         return w(cursor)
     else:
-        return "Feature not implemented"
+        return "Feature not implemented","text"
 
 def im(name,cursor):
     query = f"""
@@ -33,14 +33,11 @@ def w(cursor):
         SELECT image_id
         FROM image
         WHERE owner_id IN (
-            SELECT id, name FROM person ORDER BY RAND() LIMIT 1
+            SELECT id, name FROM waifu ORDER BY RAND() LIMIT 1
         )
         ORDER BY RAND()
         LIMIT 1
     """
     cursor.execute(query)
     result = cursor.fetchone()[0]
-    if not result:
-        return "Not Found", "text"
-    else:
-        return result, "image"
+    return result, "image"
