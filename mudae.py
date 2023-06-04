@@ -204,6 +204,8 @@ def mm(connection, userid):
     """
     cursor.execute(harem_query)
     waifu_names = cursor.fetchall()
+    if not waifu_names:
+        return "空的","text"
     name_list = []
     for waifu_name in waifu_names:
         name_list.append(waifu_name[0])
