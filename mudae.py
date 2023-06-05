@@ -54,7 +54,7 @@ def processMudae(content,fromUser,connection):
             "还没roll捏","text"
         return imr(connection,curr_roll)
     elif content[0] == 'w':
-        if not roll_count or roll_count<10:
+        if not roll_count or roll_count<20:
             return w(connection,userid)
         return "（每小时10次，下个小时再来吧）","text"
     elif content[:7] == "divorce":
@@ -68,10 +68,20 @@ def processMudae(content,fromUser,connection):
     else:
         return "前面的功能以后再来探索吧","text"
 
-def im(connection,content):
+def im(connection,content,user_id):
     cursor = connection.cursor()
     cursor.nextset()
     cursor.execute("USE notaweeb")
+    harem_query = f"""
+            SELECT name
+            FROM waifu
+            WHERE id IN (SELECT waifu_id FROM marry WHERE user_id = {user_id})
+        """
+    cursor.execute(harem_query)
+    result = cursor.fetchall()
+    waifu_list = []
+    for waifu_name in result:
+        waifu_list.append(waifu_name[0])
     if content.split()[-1][0] == '$':
         name = ' '.join(content.split()[:-1])
         index = content.split()[-1][1:]
@@ -111,15 +121,27 @@ def im(connection,content):
         """
         cursor.execute(marry_query)
         married_by = cursor.fetchone()[0]
-        if married_by:
+        if waifu_name in waifu_list:
+            return f"{name}❤\nfrom {series}\nClaim#： {married_by}", "text"
+        elif married_by:
             return f"{name}\nfrom {series}\nClaim#： {married_by}", "text"
         else:
             return f"{name}\nfrom {series}", "text"
 
-def ima(connection, content):
+def ima(connection, content,user_id):
     cursor = connection.cursor()
     cursor.nextset()
     cursor.execute("USE notaweeb")
+    harem_query = f"""
+                SELECT name
+                FROM waifu
+                WHERE id IN (SELECT waifu_id FROM marry WHERE user_id = {user_id})
+            """
+    cursor.execute(harem_query)
+    result = cursor.fetchall()
+    waifu_list = []
+    for waifu_name in result:
+        waifu_list.append(waifu_name[0])
     if content.split()[-1][0] == '$':
         name = ' '.join(content.split()[:-1])
         index = (int(content.split()[-1][1:])-1)*10
@@ -137,7 +159,10 @@ def ima(connection, content):
             return "Not found", "text"
         name_list = []
         for waifu_name in result:
-            name_list.append(waifu_name[0])
+            if waifu_name in waifu_list:
+                name_list.append(waifu_name[0] + "❤")
+            else:
+                name_list.append(waifu_name[0])
         if len(name_list) > 10:
             return '\n'.join(name_list[:10]), "text"
         else:
@@ -155,16 +180,29 @@ def ima(connection, content):
             return "Not found", "text"
         name_list = []
         for waifu_name in result:
-            name_list.append(waifu_name[0])
+            if waifu_name in waifu_list:
+                name_list.append(waifu_name[0]+"❤")
+            else:
+                name_list.append(waifu_name[0])
         if len(name_list)>10:
             return '\n'.join(name_list[:10])+"\n……", "text"
         else:
             return '\n'.join(name_list), "text"
 
-def imr(connection, curr_roll):
+def imr(connection, curr_roll,user_id):
     cursor = connection.cursor()
     cursor.nextset()
     cursor.execute("USE notaweeb")
+    harem_query = f"""
+        SELECT name
+        FROM waifu
+        WHERE id IN (SELECT waifu_id FROM marry WHERE user_id = {user_id})
+    """
+    cursor.execute(harem_query)
+    result = cursor.fetchall()
+    waifu_list = []
+    for waifu_name in result:
+        waifu_list.append(waifu_name[0])
     query = f"""
         SELECT *
         FROM waifu
@@ -182,8 +220,10 @@ def imr(connection, curr_roll):
     """
     cursor.execute(marry_query)
     married_by = cursor.fetchone()[0]
-    if married_by:
-        return f"{name}\nfrom {series}\nClaim#：{married_by}", "text"
+    if waifu_name in waifu_list:
+        return f"{name}❤\nfrom {series}\nClaim#： {married_by}", "text"
+    elif married_by:
+        return f"{name}\nfrom {series}\nClaim#： {married_by}", "text"
     else:
         return f"{name}\nfrom {series}", "text"
 
