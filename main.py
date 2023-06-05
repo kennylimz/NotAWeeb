@@ -33,24 +33,15 @@ connection = pymysql.connect(
 def job1():
     process.gpt_dict.clear()
     mudae.reset(connection)
-    global connection
-    connection.close()
-    connection = pymysql.connect(
-        host='34.31.231.212',
-        port= 3306,
-        user='root',
-        password='12345678'
-    )
     print("Quota Cleared")
 
-@scheduler.task('interval', id='get_token', minutes=60)
-def job2():
-    global  access_token
-    response = requests.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx89ada809e95adb96&secret=afaa7edfa9f8d54cc8b68c48be4aef19")
-    access_token = response.json()['access_token']
-    print("access_token refreshed")
-
-
+# @scheduler.task('interval', id='get_token', minutes=60)
+# def job2():
+#     global  access_token
+#     response = requests.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx89ada809e95adb96&secret=afaa7edfa9f8d54cc8b68c48be4aef19")
+#     access_token = response.json()['access_token']
+#     print("access_token refreshed")
+#
 
 @app.route('/wx', methods=['GET'])
 def handleGet():
