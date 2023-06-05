@@ -50,6 +50,8 @@ def processMudae(content,fromUser,connection):
     elif content[:4] == "ima ":
         return ima(connection,content[4:])
     elif content[:3] == "imr":
+        if not curr_roll:
+            "还没roll捏","text"
         return imr(connection,curr_roll)
     elif content[0] == 'w':
         if not roll_count or roll_count<10:
