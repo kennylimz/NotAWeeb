@@ -29,7 +29,7 @@ connection = pymysql.connect(
     password='12345678'
 )
 
-@scheduler.task('interval', id='clear_quota', minutes=60)
+@scheduler.task('cron', id='clear_quota', minute='0')
 def job1():
     process.gpt_dict.clear()
     mudae.reset(connection)
@@ -42,11 +42,12 @@ def job2():
     connection.close()
     connection = pymysql.connect(
         host='34.31.231.212',
-        port= 3306,
+        port=3306,
         user='root',
         password='12345678'
     )
     print("Connection Reset")
+
 
 # @scheduler.task('interval', id='get_token', minutes=60)
 # def job2():
