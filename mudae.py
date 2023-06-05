@@ -46,15 +46,15 @@ def processMudae(content,fromUser,connection):
     else:
         userid, username, wechat_id, curr_roll, roll_count, claimed = result
     if content[:3] == "im ":
-        return im(connection,content[3:])
+        return im(connection,content[3:],userid)
     elif content[:4] == "ima ":
-        return ima(connection,content[4:])
+        return ima(connection,content[4:],userid)
     elif content[:3] == "imr":
         if not curr_roll:
             "还没roll捏","text"
-        return imr(connection,curr_roll)
+        return imr(connection,curr_roll,userid)
     elif content[0] == 'w':
-        if not roll_count or roll_count<20:
+        if not roll_count or roll_count<12:
             return w(connection,userid)
         return "（每小时10次，下个小时再来吧）","text"
     elif content[:7] == "divorce":
@@ -73,10 +73,10 @@ def im(connection,content,user_id):
     cursor.nextset()
     cursor.execute("USE notaweeb")
     harem_query = f"""
-            SELECT name
-            FROM waifu
-            WHERE id IN (SELECT waifu_id FROM marry WHERE user_id = {user_id})
-        """
+        SELECT name
+        FROM waifu
+        WHERE id IN (SELECT waifu_id FROM marry WHERE user_id = {user_id})
+    """
     cursor.execute(harem_query)
     result = cursor.fetchall()
     waifu_list = []
@@ -121,10 +121,11 @@ def im(connection,content,user_id):
         """
         cursor.execute(marry_query)
         married_by = cursor.fetchone()[0]
-        if waifu_name in waifu_list:
-            return f"{name}❤\nfrom {series}\nClaim#： {married_by}", "text"
+        if name in waifu_list:
+            print("get")
+            return f"{name}❤ \nfrom {series}\nClaim#：{married_by}", "text"
         elif married_by:
-            return f"{name}\nfrom {series}\nClaim#： {married_by}", "text"
+            return f"{name}\nfrom {series}\nClaim#：{married_by}", "text"
         else:
             return f"{name}\nfrom {series}", "text"
 
@@ -160,7 +161,7 @@ def ima(connection, content,user_id):
         name_list = []
         for waifu_name in result:
             if waifu_name in waifu_list:
-                name_list.append(waifu_name[0] + "❤")
+                name_list.append(waifu_name[0] + "❤ ")
             else:
                 name_list.append(waifu_name[0])
         if len(name_list) > 10:
@@ -181,7 +182,7 @@ def ima(connection, content,user_id):
         name_list = []
         for waifu_name in result:
             if waifu_name in waifu_list:
-                name_list.append(waifu_name[0]+"❤")
+                name_list.append(waifu_name[0]+"❤ ")
             else:
                 name_list.append(waifu_name[0])
         if len(name_list)>10:
@@ -220,10 +221,10 @@ def imr(connection, curr_roll,user_id):
     """
     cursor.execute(marry_query)
     married_by = cursor.fetchone()[0]
-    if waifu_name in waifu_list:
-        return f"{name}❤\nfrom {series}\nClaim#： {married_by}", "text"
+    if name in waifu_list:
+        return f"{name}❤ \nfrom {series}\nClaim#：{married_by}", "text"
     elif married_by:
-        return f"{name}\nfrom {series}\nClaim#： {married_by}", "text"
+        return f"{name}\nfrom {series}\nClaim#：{married_by}", "text"
     else:
         return f"{name}\nfrom {series}", "text"
 

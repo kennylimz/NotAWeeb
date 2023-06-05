@@ -35,6 +35,19 @@ def job1():
     mudae.reset(connection)
     print("Quota Cleared")
 
+@scheduler.task('interval', id='reset_connection', minutes=15)
+def job2():
+    global connection
+    connection.commit()
+    connection.close()
+    connection = pymysql.connect(
+        host='34.31.231.212',
+        port= 3306,
+        user='root',
+        password='12345678'
+    )
+    print("Connection Reset")
+
 # @scheduler.task('interval', id='get_token', minutes=60)
 # def job2():
 #     global  access_token
