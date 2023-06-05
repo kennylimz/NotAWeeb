@@ -134,10 +134,10 @@ def ima(connection, content,user_id):
     cursor.nextset()
     cursor.execute("USE notaweeb")
     harem_query = f"""
-                SELECT name
-                FROM waifu
-                WHERE id IN (SELECT waifu_id FROM marry WHERE user_id = {user_id})
-            """
+        SELECT name
+        FROM waifu
+        WHERE id IN (SELECT waifu_id FROM marry WHERE user_id = {user_id})
+    """
     cursor.execute(harem_query)
     result = cursor.fetchall()
     waifu_list = []
@@ -160,7 +160,7 @@ def ima(connection, content,user_id):
             return "Not found", "text"
         name_list = []
         for waifu_name in result:
-            if waifu_name in waifu_list:
+            if waifu_name[0] in waifu_list:
                 name_list.append(waifu_name[0] + "❤ ")
             else:
                 name_list.append(waifu_name[0])
@@ -181,7 +181,7 @@ def ima(connection, content,user_id):
             return "Not found", "text"
         name_list = []
         for waifu_name in result:
-            if waifu_name in waifu_list:
+            if waifu_name[0] in waifu_list:
                 name_list.append(waifu_name[0]+"❤ ")
             else:
                 name_list.append(waifu_name[0])
