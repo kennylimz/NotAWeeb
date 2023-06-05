@@ -33,6 +33,14 @@ connection = pymysql.connect(
 def job1():
     process.gpt_dict.clear()
     mudae.reset(connection)
+    global connection
+    connection.close()
+    connection = pymysql.connect(
+        host='34.31.231.212',
+        port= 3306,
+        user='root',
+        password='12345678'
+    )
     print("Quota Cleared")
 
 @scheduler.task('interval', id='get_token', minutes=60)
