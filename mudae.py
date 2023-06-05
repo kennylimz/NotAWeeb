@@ -84,7 +84,7 @@ def im(connection,content,user_id):
         waifu_list.append(waifu_name[0])
     if content.split()[-1][0] == '$':
         name = ' '.join(content.split()[:-1])
-        index = content.split()[-1][1:]
+        index = content.split()[-1][1:]-1
         query = f"""
             SELECT image_id
             FROM image
