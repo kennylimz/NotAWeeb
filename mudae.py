@@ -238,8 +238,7 @@ def w(connection,roller):
         SELECT * FROM waifu ORDER BY RAND() LIMIT 1
     """
     cursor.execute(waifu_query)
-    waifu_id = cursor.fetchone()[0]
-    waifu_series = cursor.fetchone()[2]
+    waifu_id, _, waifu_series = cursor.fetchone()
     if waifu_series=="明日方舟":
         cursor.execute(waifu_query)
         waifu_id = cursor.fetchone()[0]

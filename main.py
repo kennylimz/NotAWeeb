@@ -99,7 +99,7 @@ def handlePost():
             toUser = recMsg.FromUserName
             fromUser = recMsg.ToUserName
             recContent = recMsg.Content.decode('utf-8')
-            if recContent[0] == '$':
+            if recContent[0] == '$' and len(recContent)>1:
                 replyContent, replyType = mudae.processMudae(recContent[1:],toUser,connection)
             else:
                 replyContent, replyType = process.textProcess(recContent, toUser, duplicated)
