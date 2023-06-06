@@ -239,6 +239,10 @@ def w(connection,roller):
     """
     cursor.execute(waifu_query)
     waifu_id = cursor.fetchone()[0]
+    waifu_series = cursor.fetchone()[2]
+    if waifu_series=="明日方舟":
+        cursor.execute(waifu_query)
+        waifu_id = cursor.fetchone()[0]
     update_query = f"""
         UPDATE player
         SET curr_roll={waifu_id}, roll_count=roll_count+1
@@ -291,6 +295,15 @@ def claim(connection, userid):
     #         return "已经是你的人辣","text"
     #     else:
     #         return f"已经是{ntr}的人辣","text"
+    marry_query = f"""
+        SELECT *
+        FROM marry
+        WHERE user_id={userid} AND waifu_id={waifu_id}
+    """
+    cursor.execute(marry_query)
+    result = cursor.fetchone()
+    if result:
+        return "已经是你的辣","text"
     marry_query = f"""
         INSERT INTO marry (user_id, waifu_id)
         VALUES ({userid},{waifu_id})
