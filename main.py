@@ -33,6 +33,7 @@ def job1():
         password='12345678'
     )
     mudae.reset(connection)
+    connection.close()
     print("Quota Cleared")
 
 
@@ -94,6 +95,7 @@ def handlePost():
                     password='12345678'
                 )
                 replyContent, replyType = mudae.processMudae(recContent[1:],toUser,connection)
+                connection.close()
             else:
                 replyContent, replyType = process.textProcess(recContent, toUser, duplicated)
             # if replyType == "gpt":
