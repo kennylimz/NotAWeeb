@@ -22,31 +22,18 @@ scheduler.start()
 msgIds = []
 # response = requests.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx89ada809e95adb96&secret=")
 # access_token = response.json()['access_token']
-connection = pymysql.connect(
-    host='34.31.231.212',
-    port= 3306,
-    user='root',
-    password='12345678'
-)
 
 @scheduler.task('cron', id='clear_quota', minute='0')
 def job1():
     process.gpt_dict.clear()
-    mudae.reset(connection)
-    print("Quota Cleared")
-
-@scheduler.task('interval', id='reset_connection', minutes=15)
-def job2():
-    global connection
-    connection.commit()
-    connection.close()
     connection = pymysql.connect(
         host='34.31.231.212',
         port=3306,
         user='root',
         password='12345678'
     )
-    print("Connection Reset")
+    mudae.reset(connection)
+    print("Quota Cleared")
 
 
 # @scheduler.task('interval', id='get_token', minutes=60)
@@ -100,6 +87,12 @@ def handlePost():
             fromUser = recMsg.ToUserName
             recContent = recMsg.Content.decode('utf-8')
             if recContent[0] == '$' and len(recContent)>1:
+                connection = pymysql.connect(
+                    host='34.31.231.212',
+                    port=3306,
+                    user='root',
+                    password='12345678'
+                )
                 replyContent, replyType = mudae.processMudae(recContent[1:],toUser,connection)
             else:
                 replyContent, replyType = process.textProcess(recContent, toUser, duplicated)

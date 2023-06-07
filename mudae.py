@@ -8,6 +8,7 @@ def reset(connection):
     """
     cursor.execute(query)
     connection.commit()
+    connection.close()
 
 def processMudae(content,fromUser,connection):
     cursor = connection.cursor()
@@ -23,15 +24,19 @@ def processMudae(content,fromUser,connection):
         cursor.execute(query)
         result = cursor.fetchone()
         if result:
+            connection.close()
             return "id是别人的了", "text"
         if "lmz" in username or "李明之" in username:
+            connection.close()
             return "差不多得了😅", "text"
         if len(username)>16:
+            connection.close()
             return "……你这名字是不是有点长了","text"
         else:
             insert_player_query = f"INSERT INTO player (name,wechat_user) VALUES ('{username}','{fromUser}')"
             cursor.execute(insert_player_query)
             connection.commit()
+            connection.close()
             return f"{username}你好","text"
     query = f"""
         SELECT *
@@ -42,6 +47,7 @@ def processMudae(content,fromUser,connection):
     result = cursor.fetchone()
 
     if not result:
+        connection.close()
         return "玩之前要先注册辣，\n注册格式是：$r 君の名", "text"
     else:
         userid, username, wechat_id, curr_roll, roll_count, claimed = result
@@ -51,11 +57,13 @@ def processMudae(content,fromUser,connection):
         return ima(connection,content[4:],userid)
     elif content[:3] == "imr":
         if not curr_roll:
-            "还没roll捏","text"
+            connection.close()
+            return "还没roll捏","text"
         return imr(connection,curr_roll,userid)
     elif content[0] == 'w':
         if not roll_count or roll_count<12:
             return w(connection,userid)
+        connection.close()
         return "（每小时10次，下个小时再来吧）","text"
     elif content[:7] == "divorce":
         return divorce(connection,userid,content[8:])
@@ -63,9 +71,11 @@ def processMudae(content,fromUser,connection):
         return mm(connection,userid)
     elif content[:5] == "claim":
         if claimed:
+            connection.close()
             return "（已经claim过了，下个小时再来吧）","text"
         return claim(connection,userid)
     else:
+        connection.close()
         return "前面的功能以后再来探索吧","text"
 
 def im(connection,content,user_id):
@@ -86,6 +96,7 @@ def im(connection,content,user_id):
         name = ' '.join(content.split()[:-1])
         index = int(content.split()[-1][1:])-1
         if index<0:
+            connection.close()
             return "Not Found", "text"
         query = f"""
             SELECT image_id
@@ -101,8 +112,10 @@ def im(connection,content,user_id):
         cursor.execute(query)
         result = cursor.fetchone()
         if not result:
+            connection.close()
             return "Not Found", "text"
         else:
+            connection.close()
             return result[0], "image"
     else:
         name = content
@@ -114,6 +127,7 @@ def im(connection,content,user_id):
         cursor.execute(query)
         result = cursor.fetchone()
         if not result:
+            connection.close()
             return "Not Found", "text"
         id, name, series = result
         marry_query = f"""
@@ -123,8 +137,8 @@ def im(connection,content,user_id):
         """
         cursor.execute(marry_query)
         married_by = cursor.fetchone()[0]
+        connection.close()
         if name in waifu_list:
-            print("get")
             return f"{name}❤ \nfrom {series}\nClaim#：{married_by}", "text"
         elif married_by:
             return f"{name}\nfrom {series}\nClaim#：{married_by}", "text"
@@ -159,6 +173,7 @@ def ima(connection, content,user_id):
         cursor.execute(query)
         result = cursor.fetchall()
         if not result:
+            connection.close()
             return "Not found", "text"
         name_list = []
         for waifu_name in result:
@@ -166,6 +181,7 @@ def ima(connection, content,user_id):
                 name_list.append(waifu_name[0] + "❤ ")
             else:
                 name_list.append(waifu_name[0])
+        connection.close()
         if len(name_list) > 10:
             return '\n'.join(name_list[:10]), "text"
         else:
@@ -180,6 +196,7 @@ def ima(connection, content,user_id):
         cursor.execute(query)
         result = cursor.fetchall()
         if not result:
+            connection.close()
             return "Not found", "text"
         name_list = []
         for waifu_name in result:
@@ -187,6 +204,7 @@ def ima(connection, content,user_id):
                 name_list.append(waifu_name[0]+"❤ ")
             else:
                 name_list.append(waifu_name[0])
+        connection.close()
         if len(name_list)>10:
             return '\n'.join(name_list[:10])+"\n……", "text"
         else:
@@ -214,6 +232,7 @@ def imr(connection, curr_roll,user_id):
     cursor.execute(query)
     result = cursor.fetchone()
     if not result:
+        connection.close()
         return "Not Found", "text"
     id, name, series = result
     marry_query = f"""
@@ -223,6 +242,7 @@ def imr(connection, curr_roll,user_id):
     """
     cursor.execute(marry_query)
     married_by = cursor.fetchone()[0]
+    connection.close()
     if name in waifu_list:
         return f"{name}❤ \nfrom {series}\nClaim#：{married_by}", "text"
     elif married_by:
@@ -259,6 +279,7 @@ def w(connection,roller):
     """
     cursor.execute(image_query)
     result = cursor.fetchone()[0]
+    connection.close()
     return result, "image"
 
 def claim(connection, userid):
@@ -273,6 +294,7 @@ def claim(connection, userid):
     cursor.execute(user_query)
     username, curr_roll = cursor.fetchone()
     if not curr_roll:
+        connection.close()
         return "你还没roll捏","text"
     waifu_query = f"""
         SELECT id, name
@@ -302,6 +324,7 @@ def claim(connection, userid):
     cursor.execute(marry_query)
     result = cursor.fetchone()
     if result:
+        connection.close()
         return "已经是你的辣","text"
     marry_query = f"""
         INSERT INTO marry (user_id, waifu_id)
@@ -315,6 +338,7 @@ def claim(connection, userid):
     """
     cursor.execute(claim_query)
     connection.commit()
+    connection.close()
     return f"{username} and {waifu_name} are married!","text"
 
 def divorce(connection,userid,name):
@@ -329,6 +353,7 @@ def divorce(connection,userid,name):
     cursor.execute(waifu_query)
     result = cursor.fetchone()
     if not result:
+        connection.close()
         return "❌", "text"
     waifu_id, waifu_name = result
     div_query = f"""
@@ -337,6 +362,7 @@ def divorce(connection,userid,name):
     """
     cursor.execute(div_query)
     connection.commit()
+    connection.close()
     return "✔","text"
 
 def mm(connection, userid):
@@ -351,8 +377,10 @@ def mm(connection, userid):
     cursor.execute(harem_query)
     waifu_names = cursor.fetchall()
     if not waifu_names:
+        connection.close()
         return "空的","text"
     name_list = []
     for waifu_name in waifu_names:
         name_list.append(waifu_name[0])
+    connection.close()
     return '\n'.join(name_list),"text"
