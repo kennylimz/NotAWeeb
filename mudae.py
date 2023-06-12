@@ -46,7 +46,12 @@ def processMudae(content,fromUser,connection):
         return "玩之前要先注册辣，\n注册格式是：$r 君の名", "text"
     else:
         userid, username, wechat_id, curr_roll, roll_count, claimed = result
-    if content[:3] == "im ":
+    if content == "h":
+        return """
+            非常感谢你使用此公众号！教程文档在：
+            https://www.bilibili.com/read/readlist/rl717702
+        """, "text"
+    elif content[:3] == "im ":
         return im(connection,content[3:],userid)
     elif content[:4] == "ima ":
         return ima(connection,content[4:],userid)
