@@ -68,8 +68,8 @@ def processMudae(content,fromUser,connection):
         if claimed:
             return "（已经claim过了，下个小时再来吧）","text"
         return claim(connection,userid)
-    elif content[:4] == "top ":
-        return top(connection, content[4:])
+    elif content[:3] == "top":
+        return top(connection, content)
     elif content[:2] == "d ":
         return ban(connection,content[2:], userid)
     elif content[:2] == "dl":
