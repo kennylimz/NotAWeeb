@@ -165,7 +165,6 @@ def ima(connection, content,user_id):
             SELECT name
             FROM waifu
             WHERE series = '{name}'
-            ORDER BY RAND()
             LIMIT 11
             OFFSET {index}
         """
@@ -417,7 +416,7 @@ def ban(connection, content, user_id):
     """
     cursor.execute(ban_query)
     result = cursor.fetchall()
-    if len(result)>=1:
+    if len(result)>=2:
         return "超出禁用上限","text"
     for row in result:
         if row[0]==series:
